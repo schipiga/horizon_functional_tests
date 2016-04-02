@@ -5,7 +5,7 @@ class Element(object):
 
     def __init__(self, selector):
         self._selector = selector
-        self._element = element
+        self._element = None
 
     @property
     def _selenium_selector(self):
@@ -42,5 +42,6 @@ class PageMain(BasePage):
 
     url = '/'
 
-    login = Element("name:login")
-    password = Element("name:passwd")
+    login_field = Element("name:login")
+    password_field = Element("name:passwd")
+    login_button = Element("name:submit")

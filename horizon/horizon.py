@@ -48,7 +48,6 @@ class Horizon(object):
         self.app_url = url
         self.webdriver = browsers[browser](*args, **kwgs)
         self.webdriver.set_page_load_timeout(30)
-        self.webdriver.get(url)
 
     def open_url(self, url):
         self.webdriver.get(urljoin(self.app_url, url))
