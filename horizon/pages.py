@@ -1,6 +1,49 @@
 __all__ = ["PageKeyPairs", "PageMain"]
 
 
+class WebElement(object):
+
+    def set_text(self, text):
+        pass
+
+    def get_text(self, text):
+        pass
+
+    def click(self):
+        pass
+
+    def right_click(self):
+        pass
+
+    def double_click(self):
+        pass
+
+    @property
+    def is_present(self):
+        pass
+
+    @property
+    def is_checked(self):
+        pass
+
+    @property
+    def is_enabled(self):
+        pass
+
+    @property
+    def is_visible(self):
+        pass
+
+    @property
+    def name(self):
+        pass
+
+    @property
+    def position(self):
+        pass
+
+
+
 class Element(object):
 
     def __init__(self, selector):

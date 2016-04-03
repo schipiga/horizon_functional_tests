@@ -16,9 +16,6 @@ class DummyStep(object):
         return func
 
 
-Config.step = DummyStep
-
-
 class Step(object):
 
     def __init__(self, message):
@@ -38,5 +35,5 @@ class Step(object):
     @property
     def _step(self):
         if not getattr(self, '_cached_step', None):
-            self._cached_step = Config.step(self._message)
+            self._cached_step = (Config.step or DummyStep)(self._message)
         return self._cached_step
