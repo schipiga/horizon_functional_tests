@@ -1,90 +1,202 @@
+import abc
+from functools import wraps
+
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
+
+import config
+
+
 __all__ = ["PageKeyPairs", "PageMain"]
 
 
-class WebElement(object):
+class IElement(object):
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def set_text(self, text):
+        """
+        """
+
+    @abc.abstractproperty
+    def text(self):
+        """
+        """
+
+    @abc.abstractmethod
+    def click(self):
+        """
+        """
+
+    @abc.abstractmethod
+    def right_click(self):
+        """
+        """
+
+    @abc.abstractmethod
+    def double_click(self):
+        """
+        """
+
+    @abc.abstractproperty
+    def is_present(self):
+        """
+        """
+
+    @abc.abstractproperty
+    def is_checked(self):
+        """
+        """
+
+    @abc.abstractproperty
+    def is_enabled(self):
+        """
+        """
+
+    @abc.abstractproperty
+    def is_visible(self):
+        """
+        """
+
+
+class IClonable(object):
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def clone(self, *args, **kwgs):
+        """Clone object.
+        """
+
+
+def immediately(func):
+
+    @wraps(func)
+    def wrapper(element, *args, **kwgs):
+        try:
+            element.webdriver.implicitly_wait(0)
+            return func(element, *args, **kwgs)
+        finally:
+            element.webdriver.implicitly_wait(config.element_wait)
+
+    return wrapper
+
+
+def cache(func):
+
+    @wraps(func)
+    def wrapper(self, *args, **kwgs):
+        attr_name = '_cached_' + func.__name__
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, func(self, *args, **kwgs))
+        return getattr(self, attr_name)
+
+    return wrapper
+
+
+class Element(IElement, IClonable):
+
+    def __init__(self, locator, page=None):
+        self._locator = locator
+        self._page = page
+        self._cached_web_element = None
+
+    @property
+    @cache
+    def webdriver(self):
+        if not self._page:
+            raise AttributeError("Page isn't specified")
+        return self._page.webdriver
+
+    @property
+    @cache
+    def _action_chains(self):
+        return ActionChains(self.webdriver)
+
+    @property
+    @cache
+    def _web_element(self):
+        return self.webdriver.find_element(*self._locator)
 
     def set_text(self, text):
-        pass
+        self._web_element.send_keys(text)
 
-    def get_text(self, text):
-        pass
+    @property
+    def text(self):
+        return self._web_element.text
 
     def click(self):
-        pass
+        self._web_element.click()
 
     def right_click(self):
-        pass
+        self._action_chains.context_click(self._web_element).perform()
 
     def double_click(self):
-        pass
+        self._action_chains.double_click(self._web_element).perform()
 
     @property
+    @immediately
     def is_present(self):
-        pass
+        try:
+            self._web_element.is_displayed()
+            return True
+        except Exception:
+            return False
 
     @property
-    def is_checked(self):
-        pass
+    @immediately
+    def is_cheched(self):
+        return self._web_element.is_selected()
 
     @property
+    @immediately
     def is_enabled(self):
-        pass
+        return self._web_element.is_enabled()
 
     @property
+    @immediately
     def is_visible(self):
-        pass
+        return self._web_element.is_displayed()
 
-    @property
-    def name(self):
-        pass
-
-    @property
-    def position(self):
-        pass
+    def clone(self, locator=None, page=None):
+        return type(self)(locator or self._locator, page or self._page)
 
 
+class D(object):
 
-class Element(object):
+    def __init__(self, element):
+        self._element = element
+        self._cache = {}
 
-    def __init__(self, selector):
-        self._selector = selector
-        self._element = None
-
-    @property
-    def _selenium_selector(self):
-        return self._selector.split(':', 1)
-
-    def __get__(self, page, page_type=None):
-        if self._element:
-            try:
-                self._element.is_displayed()
-            except Exception:
-                self._element = page.webdriver.find_element(*self._selenium_selector)
-        else:
-            self._element = page.webdriver.find_element(*self._selenium_selector)
-        return self._element
+    def __get__(self, page, objtype=None):
+        page_id = id(page)
+        if page_id not in self._cache:
+            self._cache[page_id] = self._element.clone(page=page)
+        return self._cache[page_id]
 
 
 class BasePage(object):
 
-    def __init__(self, webdriver):
-        self.webdriver = webdriver
+    def __init__(self, app):
+        self.app = app
+        self.webdriver = app.webdriver
 
 
 class PageKeyPairs(BasePage):
 
     url = '/project/keypairs'
 
-    create_keypair_button = Element("id:create_keypair")
-    import_keypair_button = Element("id:import_keypair")
-    keypair_name_field = Element("id:name")
-    public_key_field = Element("id:public_key")
+    create_keypair_button = D(Element((By.ID, "create_keypair")))
+    import_keypair_button = D(Element((By.ID, "import_keypair")))
+    keypair_name_field = D(Element((By.ID, "name")))
+    public_key_field = D(Element((By.ID, "public_key")))
 
 
 class PageMain(BasePage):
 
     url = '/'
 
-    login_field = Element("name:login")
-    password_field = Element("name:passwd")
-    login_button = Element("name:submit")
+    login_field = D(Element((By.ID, "login")))
+    password_field = D(Element((By.ID, "passwd")))
+    login_button = D(Element((By.ID, "submit")))

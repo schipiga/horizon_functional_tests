@@ -19,7 +19,7 @@ def register_pages(pages):
 
             def _open_page(self, page=page):
                 self.open_url(page.url)
-                self.current_page = page(self.webdriver)
+                self.current_page = page(self)
                 return self.current_page
 
             setattr(app, 'open_' + snake_case(page.__name__), _open_page)
