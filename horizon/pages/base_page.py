@@ -1,4 +1,7 @@
-from horizon.interfaces import IPage, IWebdriverable
+from selenium.webdriver.common.by import By
+
+from horizon.interfaces import IPage, IWeb
+from horizon.utils import ContainerMixin
 
 
 class D(object):
@@ -14,8 +17,10 @@ class D(object):
         return self._cache[page_id]
 
 
-class BasePage(IPage, IWebdriverable):
+class BasePage(IPage, IWeb, ContainerMixin):
 
     def __init__(self, app):
         self.app = app
-        self.webdriver = app.webdriver
+        self.locator = (By.TAG_NAME, 'html')
+        self.web_driver = app.web_driver
+        self.web_element = self.web_driver.find_element(*self.locator)

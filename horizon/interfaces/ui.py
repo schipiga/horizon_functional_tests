@@ -1,24 +1,9 @@
 import abc
 
 
-class IElement(object):
+class IUi(object):
 
     __metaclass__ = abc.ABCMeta
-
-    @abc.abstractproperty
-    def parent(self):
-        """
-        """
-
-    @abc.abstractmethod
-    def set_text(self, text):
-        """
-        """
-
-    @abc.abstractproperty
-    def text(self):
-        """
-        """
 
     @abc.abstractmethod
     def click(self):
@@ -37,11 +22,6 @@ class IElement(object):
 
     @abc.abstractproperty
     def is_present(self):
-        """
-        """
-
-    @abc.abstractproperty
-    def is_checked(self):
         """
         """
 
