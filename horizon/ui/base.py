@@ -1,7 +1,17 @@
+from horizon.interfaces import IClonable, IUi, IWeb
+# TODO seems they must be defined here
+from horizon.utils import ContainerMixin, cached, immediately, must_defined
+
 from selenium.webdriver import ActionChains
 
-from horizon.interfaces import IClonable, IWeb, IUi
-from horizon.utils import cached, immediately, must_defined, ContainerMixin
+
+def register_ui(**kwgs):
+
+    def wrapper(cls):
+        cls.register_ui(kwgs)
+        return cls
+
+    return wrapper
 
 
 class Ui(IUi, IWeb, IClonable, ContainerMixin):

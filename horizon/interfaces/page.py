@@ -9,3 +9,8 @@ class IPage(object):
     def app(self):
         """
         """
+
+    @abc.abstractproperty
+    def url(self):
+        """
+        """

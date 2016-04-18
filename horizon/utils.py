@@ -43,8 +43,42 @@ def must_defined(func):
 
 class ContainerMixin(object):
 
+    _registered_ui = None
+
+    def __init__(self):
+        self.cloned_ui = {}
+
+    @classmethod
+    def register_ui(cls, **ui):
+        if not cls._registered_ui:
+            cls._registered_ui = {}
+        cls._registered_ui.update(ui)
+
+    @property
+    @cached
+    def registered_ui(self):
+        result = {}
+        if getattr(self, 'container', None):
+            result.update(self.container.registered_ui)
+        if self._registered_ui:
+            result.update(self._registered_ui)
+        return result
+
     def find_element(self, locator):
         return self.web_element.find_element(*locator)
 
     def find_elements(self, locator):
         return self.web_element.find_elements(*locator)
+
+    def __getattr__(self, name):
+        cloned_ui_obj = self.cloned_ui.get(name)
+        if cloned_ui_obj:
+            return cloned_ui_obj
+
+        ui_obj = self.registered_ui.get(name)
+        if ui_obj:
+            cloned_ui_obj = ui_obj.clone(container=self)
+            self.cloned_ui[name] = cloned_ui_obj
+            return cloned_ui_obj
+
+        raise AttributeError("Attribute {!r} isn't defined".format(name))
