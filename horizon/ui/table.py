@@ -1,6 +1,18 @@
 from .base import Ui
 
 
+class Row(Ui):
+    pass
+
+
+class Col(Ui):
+    pass
+
+
+class Cell(Ui):
+    pass
+
+
 class Table(Ui):
 
     _registered_cells = None
@@ -23,7 +35,9 @@ class VTable(Table):
         cls._registered_rows.extend(rows)
 
     def row(self, **kwgs):
-        
+        rows = self.container.find_elements(self.locator)
+        for row_ in rows:
+            row_.cells
 
 
 class HTable(Table):
