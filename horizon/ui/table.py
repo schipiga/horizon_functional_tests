@@ -2,7 +2,17 @@ from .base import Ui
 
 
 class Row(Ui):
-    pass
+
+    def __init__(self, locator, container=None, **kwgs):
+        super(Row, self).__init__(locator, container)
+        self._kwgs = kwgs
+
+    @property
+    @cached
+    def web_element(self):
+        rows = self.container.find_elements(*self.locator)
+        for row in rows:
+            cells = row.find_elements(*self.cell_locator)
 
 
 class Col(Ui):
@@ -10,7 +20,12 @@ class Col(Ui):
 
 
 class Cell(Ui):
-    pass
+    
+    @property
+    @cached
+    def web_element(self):
+        cells = self.container.find_elements(*self.locator)
+        return cells[self._index]
 
 
 class Table(Ui):
@@ -26,6 +41,7 @@ class Table(Ui):
 
 class VTable(Table):
 
+    _row_names = None
     _registered_rows = None
 
     @classmethod
@@ -35,9 +51,7 @@ class VTable(Table):
         cls._registered_rows.extend(rows)
 
     def row(self, **kwgs):
-        rows = self.container.find_elements(self.locator)
-        for row_ in rows:
-            row_.cells
+        return Row(self._row_locator, container=self, **kwgs)
 
 
 class HTable(Table):
